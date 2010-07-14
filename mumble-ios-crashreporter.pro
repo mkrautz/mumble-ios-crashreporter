@@ -5,13 +5,16 @@ TEMPLATE = app
 SOURCES += \
     main.cpp \
     CrashReporter.cpp \
-    PersistentCookieJar.cpp
+    PersistentCookieJar.cpp \
+    DomainNameHelper.cpp
 
 HEADERS += \
     CrashReporter.h \
-    PersistentCookieJar.h
+    PersistentCookieJar.h \
+    DomainNameHelper.h
 
 FORMS += \
     CrashReporter.ui
 
-RESOURCES +=
+RESOURCES += \
+    mumble-ios-crashreporter.qrc

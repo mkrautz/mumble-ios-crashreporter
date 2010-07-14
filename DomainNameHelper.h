@@ -27,31 +27,41 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef __PERSISTENTCOOKIEJAR_H__
-#define __PERSISTENTCOOKIEJAR_H__
+#ifndef __DOMAINNAMEHELPER_H__
+#define __DOMAINNAMEHELPER_H__
 
-#include <QtNetwork/QtNetwork>
-#include "DomainNameHelper.h"
+#include <QtCore/QtCore>
 
-class PersistentCookieJar : public QNetworkCookieJar {
-    Q_OBJECT
+class PublicSuffixRule {
+    protected:
+        bool bException;
+        bool bWildcard;
+        QStringList qslLabels;
+    public:
+        PublicSuffixRule();
+        PublicSuffixRule(QString rule);
+        ~PublicSuffixRule();
+        bool isNull();
+        QString key();
+        bool isException();
+        bool isWildcard();
+        QStringList labels();
+        int numLabels();
+        QString toString();
+};
 
-protected:
-    DomainNameHelper dnh;
-    QMap<QString, QList<QNetworkCookie> > storage;
-    QString safeCookieDomain(QNetworkCookie &cookie, const QUrl &url);
+class DomainNameHelper {
+    protected:
+        QMap<QString, QList<PublicSuffixRule> > qmRules;
 
-public:
-    PersistentCookieJar(QObject *parent = 0);
-    ~PersistentCookieJar();
-
-    void persistCookiesToIODevice(QIODevice *device);
-    void loadPersistentCookiesFromIODevice(QIODevice *device);
-
-    QList<QNetworkCookie> cookiesForUrl(const QUrl &url) const;
-    bool setCookiesFromUrl(const QList<QNetworkCookie> &cookieList, const QUrl &url);
-    QList<QNetworkCookie> allCookies() const;
-    void setAllCookies(const QList<QNetworkCookie> &cookieList);
+        void parsePublicSuffixFile();
+        QStringList domainLabels(const QString &str) const;
+        QList<PublicSuffixRule> getMatchingRules(const QString &str) const;
+        PublicSuffixRule getMatchingRule(const QString &str) const;
+    public:
+        DomainNameHelper();
+        ~DomainNameHelper();
+        QString getRegisteredDomainPart(const QString &str) const;
 };
 
 #endif

@@ -31,6 +31,7 @@
 #include "ui_CrashReporter.h"
 
 #include "PersistentCookieJar.h"
+#include "DomainNameHelper.h"
 
 CrashReporter::CrashReporter(QWidget *parent) : QMainWindow(parent), ui(new Ui::CrashReporter) {
     ui->setupUi(this);

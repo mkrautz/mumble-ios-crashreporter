@@ -1,0 +1,5 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+ <file alias="effective_tld_names.dat">effective_tld_names.dat</file>
+</qresource>
+</RCC>
