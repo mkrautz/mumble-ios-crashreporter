@@ -57,13 +57,23 @@ QString LogHandler::crashLogDirectory() const {
     wchar_t *envvar = _wgetenv(L"username");
     if (envvar)
         username = QString::fromWCharArray(envvar);
+    QString appdata;
+    envvar = _wgetenv(L"APPDATA");
+    if (envvar) {
+        appdata = QString::fromWCharArray(envvar);
+        appdata.replace(QChar('\\'), QChar('/'));
+    }
 
     if (username.isEmpty())
         return QString();
 
     QStringList possiblePaths;
+    // These first two are the paths provided by Apple in their documentation. In addition,
+    // we query %APPDATA%, and check that as well, in case something weird is going on.
     possiblePaths << QString::fromLatin1("C:/Documents and Settings/%1/Application Data/Apple Computer/Logs/CrashReporter/MobileDevice").arg(username);
     possiblePaths << QString::fromLatin1("C:/Users/%1/AppData/Roaming/Apple Computer/Logs/CrashReporter/MobileDevice").arg(username);
+    if (! appdata.isEmpty())
+        possiblePaths << QString::fromLatin1("%1/Apple Computer/Logs/CrashReporter/MobileDevice").arg(appdata);
 
     foreach (QString path, possiblePaths) {
         if (QFile::exists(path))
