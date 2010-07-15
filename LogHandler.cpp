@@ -201,7 +201,12 @@ void LogHandler::submitAllCrashLogs() {
     iCurrentLog = 0;
     qlSubmitList = allCrashLogs();
     if (qlSubmitList.isEmpty()) {
-        qWarning("LogHandler: No logs to submit :-)");
+        QMessageBox *qmb = new QMessageBox(NULL);
+        qmb->setIcon(QMessageBox::Information);
+        qmb->setWindowTitle(QLatin1String("No logs available"));
+        qmb->setText(QLatin1String("No crash logs were found on your computer. Nothing to send."));
+        qmb->exec();
+        delete qmb;
         return;
     }
 
@@ -296,22 +301,15 @@ void LogHandler::logSubmitCancelled() {
     // a dialog explaining the user what went wrong.
     if (failedSubmits.count() > 0) {
         QMessageBox *qmb = new QMessageBox(NULL);
-        qmb->resize(QSize(600, 300));
         qmb->setIcon(QMessageBox::Warning);
-        qmb->setWindowTitle(QString("Warning!"));
+        qmb->setWindowTitle(QString("Warning"));
         qmb->setText(QString("An error occured while submitting some of your crash logs.\n"
-                             "Click 'Show Details' for more information.\n"));
-
-        // Generate the detailed text of our message box (the list of
-        // crash reports that weren't successfully sent)
-        QStringList files;
-        foreach (DeviceLog log, failedSubmits) {
-            files << QString::fromLatin1("'%1' from device '%2'").arg(log.second, log.first);
-        }
-        qmb->setDetailedText(files.join(QString("\n")));
-
-        qmb->show();
-        qmb->resize(QSize(600, 300));
+                             "The crash logs that were not sent to the server are still kept on your computer.\n"
+                             "Please try again at a later time.\n"
+                             "\n"
+                             "If the problem persists, please file a bug on the Mumble for iOS Bug Tracker.\n"));
+        qmb->exec();
+        delete qmb;
     }
 }
 
