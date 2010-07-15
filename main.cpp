@@ -31,11 +31,11 @@
 #include "CrashReporter.h"
 
 int main(int argc, char *argv[]) {
-
     QT_REQUIRE_VERSION(argc, argv, "4.6.0");
 
     QApplication a(argc, argv);
     a.setApplicationName(QLatin1String("MumbleiOSCrashReporter"));
+    a.setApplicationVersion(QLatin1String("1.0"));
     a.setOrganizationName(QLatin1String("Mumble"));
     a.setOrganizationDomain(QLatin1String("mumble.info"));
 

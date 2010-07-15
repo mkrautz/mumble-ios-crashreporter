@@ -32,15 +32,14 @@
 
 #include <QtGui/QtGui>
 #include <QtNetwork/QtNetwork>
+#include <QtWebKit/QtWebKit>
 
 #include "PersistentCookieJar.h"
+#include "LogHandler.h"
 
-namespace Ui {
-    class CrashReporter;
-}
+#include "ui_CrashReporter.h"
 
-class CrashReporter : public QMainWindow
-{
+class CrashReporter : public QMainWindow, public Ui::CrashReporter {
     Q_OBJECT
 
 public:
@@ -48,18 +47,20 @@ public:
     ~CrashReporter();
     static QString cookieDataFilePath();
 
-private:
+protected:
+    QSettings *qsSettings;
+    LogHandler *lhLogHandler;
     PersistentCookieJar *pcjCookies;
     QNetworkAccessManager *qnamAccessor;
     QString windowTitle;
     QProgressBar *qpbProgressBar;
-    Ui::CrashReporter *ui;
+    void injectCrashReporterJavaScript();
 
 public slots:
-        void on_qwvWebView_loadFinished(bool ok);
-        void on_qwvWebView_loadProgress(int pct);
-        void on_qwvWebView_statusBarMessage(const QString &message);
-        void on_qwvWebView_titleChanged(const QString &message);
+    void on_qwvWebView_loadFinished(bool ok);
+    void on_qwvWebView_loadProgress(int pct);
+    void on_qwvWebView_statusBarMessage(const QString &message);
+    void on_qwvWebView_titleChanged(const QString &message);
 };
 
 #endif

@@ -28,21 +28,24 @@
 */
 
 #include "CrashReporter.h"
-#include "ui_CrashReporter.h"
 
-#include "PersistentCookieJar.h"
-#include "DomainNameHelper.h"
+CrashReporter::CrashReporter(QWidget *parent) : QMainWindow(parent) {
+    qsSettings = new QSettings(this);
 
-CrashReporter::CrashReporter(QWidget *parent) : QMainWindow(parent), ui(new Ui::CrashReporter) {
-    ui->setupUi(this);
+    setupUi(this);
+    windowTitle = QString::fromLatin1("Mumble for iOS Crash Reporter %1").arg(qApp->applicationVersion());
 
-    windowTitle = QString::fromLatin1("Mumble for iOS Crash Reporter");
+    // Restore stored geometry
+    restoreGeometry(qsSettings->value(QLatin1String("UserInterface/MainWindowGeometry"), saveGeometry()).toByteArray());
 
+    // New log finder
+    lhLogHandler = new LogHandler(this);
+
+    // Page load progress bar
     qpbProgressBar = new QProgressBar(this);
     qpbProgressBar->setRange(0, 100);
-
-    ui->qsbStatusBar->addPermanentWidget(qpbProgressBar, 0);
-    ui->qsbStatusBar->hide();
+    qsbStatusBar->addPermanentWidget(qpbProgressBar, 0);
+    qsbStatusBar->hide();
 
     // Create Network Access Manager for the crash reporter
     qnamAccessor = new QNetworkAccessManager(this);
@@ -56,17 +59,20 @@ CrashReporter::CrashReporter(QWidget *parent) : QMainWindow(parent), ui(new Ui::
     // Load the crash reporter page.
     QWebPage *qwpPage = new QWebPage(this);
     qwpPage->setNetworkAccessManager(qnamAccessor);
-
-    ui->qwvWebView->setPage(qwpPage);
-    ui->qwvWebView->load(QUrl(QLatin1String("http://mumble-ios.appspot.com/crashreporter")));
+    qwvWebView->setPage(qwpPage);
+    qwvWebView->load(QUrl(QLatin1String("http://mumble-ios.appspot.com/crashreporter")));
 }
 
 CrashReporter::~CrashReporter() {
+    // Persist cookies to disk before closing
     QFile f(CrashReporter::cookieDataFilePath());
     pcjCookies->persistCookiesToIODevice(&f);
 
-    delete ui;
-    delete pcjCookies;
+    // Store geometry data
+    qsSettings->setValue(QLatin1String("UserInterface/MainWindowGeometry"), saveGeometry());
+
+    // Work around crash is WebCore::PopupMenu::~PopupMenu()
+    qwvWebView->load(QUrl(QLatin1String("about:blank")));
 }
 
 QString CrashReporter::cookieDataFilePath() {
@@ -78,19 +84,34 @@ QString CrashReporter::cookieDataFilePath() {
     return QDir(path).absoluteFilePath("cookies.qds46");
 }
 
+void CrashReporter::injectCrashReporterJavaScript() {
+    qWarning("CrashReporter: Injecting crashreporter object into window property in current page.");
+    QWebPage *page = qwvWebView->page();
+    QWebFrame *frame = page->currentFrame();
+    lhLogHandler->setNetworkAccessManager(qnamAccessor);
+    frame->addToJavaScriptWindowObject(QLatin1String("crashreporter"), lhLogHandler);
+    frame->evaluateJavaScript(QLatin1String("CrashReporterLoaded();"));
+}
+
 void CrashReporter::on_qwvWebView_loadFinished(bool ok) {
     if (ok) {
-        ui->qsbStatusBar->hide();
+        qsbStatusBar->hide();
+
+        // Check if we've loaded our crash reporter page...
+        QString url = qwvWebView->url().toString();
+        if (url == QLatin1String("https://mumble-ios.appspot.com/crashreporter") || url == QLatin1String("http://mumble-ios.appspot.com/crashreporter")) {
+            injectCrashReporterJavaScript();
+        }
     }
 }
 
 void CrashReporter::on_qwvWebView_loadProgress(int pct) {
-    ui->qsbStatusBar->show();
+    qsbStatusBar->show();
     qpbProgressBar->setValue(pct);
 }
 
 void CrashReporter::on_qwvWebView_statusBarMessage(const QString &message) {
-    ui->qsbStatusBar->showMessage(message);
+    qsbStatusBar->showMessage(message);
 }
 
 void CrashReporter::on_qwvWebView_titleChanged(const QString &message) {

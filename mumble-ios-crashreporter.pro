@@ -6,12 +6,14 @@ SOURCES += \
     main.cpp \
     CrashReporter.cpp \
     PersistentCookieJar.cpp \
-    DomainNameHelper.cpp
+    DomainNameHelper.cpp \
+    LogHandler.cpp
 
 HEADERS += \
     CrashReporter.h \
     PersistentCookieJar.h \
-    DomainNameHelper.h
+    DomainNameHelper.h \
+    LogHandler.h
 
 FORMS += \
     CrashReporter.ui
