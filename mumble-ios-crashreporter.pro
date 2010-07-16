@@ -1,5 +1,5 @@
 QT += core gui network webkit
-
+CONFIG += debug_and_release
 TARGET = MumbleiOSBetaCrashReporter
 TEMPLATE = app
 
@@ -37,3 +37,13 @@ FORMS += \
 
 RESOURCES += \
     mumble-ios-crashreporter.qrc
+
+CONFIG(debug, debug|release) {
+    LIBPATH += debug
+    DESTDIR = debug
+}
+
+CONFIG(release, debug|release) {
+    LIBPATH += release
+    DESTDIR = release
+}
