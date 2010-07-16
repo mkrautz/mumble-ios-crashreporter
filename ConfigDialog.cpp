@@ -83,6 +83,8 @@ void ConfigDialog::on_qdbbButtonBox_clicked(QAbstractButton *b) {
             apply();
             break;
         }
+        default:
+            break;
     }
 }
 

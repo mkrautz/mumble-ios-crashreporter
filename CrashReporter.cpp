@@ -64,6 +64,9 @@ CrashReporter::CrashReporter(QWidget *parent) : QMainWindow(parent) {
 }
 
 CrashReporter::~CrashReporter() {
+    // Work around crash in WebCore::PopupMenu::~PopupMenu()
+    loadUrl(QLatin1String("about:blank"));
+
     // Persist cookies to disk before closing
     QFile f(CrashReporter::cookieDataFilePath());
     pcjCookies->persistCookiesToIODevice(&f);
@@ -72,16 +75,13 @@ CrashReporter::~CrashReporter() {
     Settings *s = Settings::get();
     s->setMainWindowGeometry(saveGeometry());
     s->sync();
-
-    // Work around crash is WebCore::PopupMenu::~PopupMenu()
-    qwvWebView->load(QUrl(QLatin1String("about:blank")));
 }
 
 QString CrashReporter::cookieDataFilePath() {
     QString path = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
 
     QDir d;
-    d.mkdir(path);
+    d.mkpath(path);
 
     return QDir(path).absoluteFilePath("cookies.qds46");
 }

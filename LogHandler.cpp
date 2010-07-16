@@ -33,10 +33,6 @@
 
 #include <stdlib.h>
 
-#ifndef Q_OS_WIN
-# include <windows.h>
-#endif
-
 LogHandler::LogHandler(QObject *p) : QObject(p) {
     qsCrashLogDir = LogHandler::crashLogDirectory();
     qsSubmittedCrashLogDir = LogHandler::submittedCrashLogDirectory();
@@ -94,6 +90,7 @@ void LogHandler::deleteSubmittedCrashLogs() {
 }
 
 QString LogHandler::crashLogDirectory() {
+    QStringList possiblePaths;
 #if defined(Q_OS_WIN)
     QString username;
     wchar_t *envvar = _wgetenv(L"username");
@@ -109,24 +106,27 @@ QString LogHandler::crashLogDirectory() {
     if (username.isEmpty())
         return QString();
 
-    QStringList possiblePaths;
     // These first two are the paths provided by Apple in their documentation. In addition,
     // we query %APPDATA%, and check that as well, in case something weird is going on.
     possiblePaths << QString::fromLatin1("C:/Documents and Settings/%1/Application Data/Apple Computer/Logs/CrashReporter/MobileDevice").arg(username);
     possiblePaths << QString::fromLatin1("C:/Users/%1/AppData/Roaming/Apple Computer/Logs/CrashReporter/MobileDevice").arg(username);
     if (! appdata.isEmpty())
         possiblePaths << QString::fromLatin1("%1/Apple Computer/Logs/CrashReporter/MobileDevice").arg(appdata);
+#elif defined(Q_OS_MAC)
+    char *home = getenv("HOME");
+    QString homeDir;
+    if (home)
+        homeDir = QString::fromLocal8Bit(home);
 
+    possiblePaths << QString::fromLatin1("%1/Library/Logs/CrashReporter/MobileDevice").arg(homeDir);
+    possiblePaths << QString::fromLatin1("%1/Library/Logs/DiagnosticReports/MobileDevice").arg(homeDir);
+#endif
     foreach (QString path, possiblePaths) {
         if (QFile::exists(path))
             return path;
     }
 
     return QString();
-#elif defined(Q_OS_MAC)
-    qWarning("LogHandler: Not yet implemented.");
-    return QString();
-#endif
 }
 
 // Get the path of the 'submitted log directory', i.e. the directory where we copy
@@ -135,7 +135,7 @@ QString LogHandler::crashLogDirectory() {
 QString LogHandler::submittedCrashLogDirectory() {
     QString path = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
     QDir d(path);
-    d.mkdir(QLatin1String("SubmittedLogs"));
+    d.mkpath(QLatin1String("SubmittedLogs"));
     if (d.exists(QLatin1String("SubmittedLogs")))
         return d.absoluteFilePath("SubmittedLogs");
     return QString();
@@ -145,13 +145,23 @@ QString LogHandler::submittedCrashLogDirectory() {
 //
 // Callable from JavaScript.
 QStringList LogHandler::availableCrashReporterDevices() {
+    if (qsCrashLogDir.isEmpty())
+        return QStringList();
+
     QDir d(qsCrashLogDir);
 
     // Update the list of safe devices.
     QStringList availDevs = d.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-    qslSafeDeviceNames = availDevs;
 
-    return availDevs;
+    // Don't include .symbolicated devices.
+    qslSafeDeviceNames.clear();
+    foreach (QString dev, availDevs) {
+        if (dev.endsWith(QLatin1String(".symbolicated")))
+            continue;
+        qslSafeDeviceNames << dev;
+    }
+
+    return qslSafeDeviceNames;
 }
 
 // Get a list of the available crash reports for a particular device. This lists the files of a
@@ -180,7 +190,11 @@ QStringList LogHandler::crashFilesForDevice(const QString &deviceName) {
 //
 // Callable from JavaScript.
 QByteArray LogHandler::contentsOfCrashFile(const QString &deviceName, const QString &fileName) const {
-    // Are we accessing a safe file?
+    // No crash log dir set? No cookie.
+    if (qsCrashLogDir.isEmpty())
+		return QByteArray();
+
+	// Are we accessing a safe file?
     if (! qslSafeDeviceNames.contains(deviceName) || ! qmSafeDeviceFiles[deviceName].contains(fileName))
         return QByteArray();
 
@@ -211,6 +225,9 @@ QString LogHandler::contentsOfCrashFileAsString(const QString &deviceName, const
 // Returns a QFileInfoList for all crash logs for the iOS appplication 'appName' from the device identified
 // by 'deviceName'.
 QFileInfoList LogHandler::crashLogPathsForApplication(const QString &appName, const QString &deviceName) const {
+    if (qsCrashLogDir.isEmpty())
+		return QFileInfoList();
+
     QDir d(qsCrashLogDir);
     d.cd(deviceName);
     QStringList filters;
@@ -376,6 +393,11 @@ void LogHandler::resetState() {
 // but merely copies them into our own directory in %APPDATA%
 // or ~/Library/Application Data/ depending on the platform.
 void LogHandler::removeSubmittedLogs() const {
+    if (qsCrashLogDir.isEmpty()) {
+        qWarning("LogHandler: Empty crash log dir. Not removing logs.");
+        return;
+    }
+
     if (qsSubmittedCrashLogDir.isEmpty()) {
         qWarning("LogHandler: Empty submit dir. Not removing logs.");
         return;
@@ -385,8 +407,8 @@ void LogHandler::removeSubmittedLogs() const {
         QDir d(qsSubmittedCrashLogDir);
         QByteArray contents = contentsOfCrashFile(log.first, log.second);
         if (! d.exists(log.first)) {
-            if (! d.mkdir(log.first)) {
-                qWarning("LogHandler: Failed to mkdir '%s'. Skipping log.", qPrintable(log.first));
+            if (! d.mkpath(log.first)) {
+                qWarning("LogHandler: Failed to mkpath '%s'. Skipping log.", qPrintable(log.first));
                 continue;
             }
         }
