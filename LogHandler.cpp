@@ -38,8 +38,8 @@
 #endif
 
 LogHandler::LogHandler(QObject *p) : QObject(p) {
-    qsCrashLogDir = crashLogDirectory();
-    qsSubmittedCrashLogDir = submittedCrashLogDirectory();
+    qsCrashLogDir = LogHandler::crashLogDirectory();
+    qsSubmittedCrashLogDir = LogHandler::submittedCrashLogDirectory();
     qnamAccessManager = NULL;
     sState = LogHandler::Ready;
 }
@@ -51,7 +51,49 @@ void LogHandler::setNetworkAccessManager(QNetworkAccessManager *qnam) {
     qnamAccessManager = qnam;
 }
 
-QString LogHandler::crashLogDirectory() const {
+QNetworkAccessManager *LogHandler::networkAccessManager() const {
+    return qnamAccessManager;
+}
+
+void LogHandler::showSubmittedCrashLogs() {
+    QString fileName = LogHandler::submittedCrashLogDirectory();
+    QFile f(fileName);
+    if (! f.exists()) {
+        QMessageBox *qmb = new QMessageBox(NULL);
+        qmb->setIcon(QMessageBox::Information);
+        qmb->setWindowTitle(QLatin1String("Submitted log directory not found"));
+        qmb->setText(QLatin1String("The submitted logs directory does not exist. This most likely means "
+                                   "that there are no stored logs on your machine."));
+        qmb->exec();
+        delete qmb;
+    } else {
+        QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
+    }
+}
+
+void LogHandler::deleteSubmittedCrashLogs() {
+    QString submittedDir = LogHandler::submittedCrashLogDirectory();
+    if (submittedDir.isEmpty())
+        return;
+    QStringList directories;
+    QDirIterator iter(submittedDir, QDirIterator::Subdirectories);
+    while (iter.hasNext()) {
+        iter.next();
+        QFileInfo fi = iter.fileInfo();
+        if (fi.isDir())
+            directories << fi.absoluteFilePath();
+        else {
+            QFile f(fi.absoluteFilePath());
+            f.remove();
+        }
+    }
+    foreach (QString dir, directories) {
+        QDir d;
+        d.rmdir(dir);
+    }
+}
+
+QString LogHandler::crashLogDirectory() {
 #if defined(Q_OS_WIN)
     QString username;
     wchar_t *envvar = _wgetenv(L"username");
@@ -90,7 +132,7 @@ QString LogHandler::crashLogDirectory() const {
 // Get the path of the 'submitted log directory', i.e. the directory where we copy
 // the logs that we've submitted to the server already... In case users want to keep
 // them.
-QString LogHandler::submittedCrashLogDirectory() const {
+QString LogHandler::submittedCrashLogDirectory() {
     QString path = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
     QDir d(path);
     d.mkdir(QLatin1String("SubmittedLogs"));

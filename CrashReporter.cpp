@@ -28,15 +28,18 @@
 */
 
 #include "CrashReporter.h"
+#include "ConfigDialog.h"
+#include "Settings.h"
 
 CrashReporter::CrashReporter(QWidget *parent) : QMainWindow(parent) {
-    qsSettings = new QSettings(this);
-
     setupUi(this);
-    windowTitle = QString::fromLatin1("Mumble for iOS Crash Reporter %1").arg(qApp->applicationVersion());
+    windowTitle = QString::fromLatin1("Mumble for iOS Beta Crash Reporter %1").arg(qApp->applicationVersion());
 
     // Restore stored geometry
-    restoreGeometry(qsSettings->value(QLatin1String("UserInterface/MainWindowGeometry"), saveGeometry()).toByteArray());
+    Settings *s = Settings::get();
+    restoreGeometry(s->mainWindowGeometry(saveGeometry()));
+    // Apply any global settings (if needed)
+    s->apply();
 
     // New log finder
     lhLogHandler = new LogHandler(this);
@@ -56,11 +59,8 @@ CrashReporter::CrashReporter(QWidget *parent) : QMainWindow(parent) {
     pcjCookies->loadPersistentCookiesFromIODevice(&f);
     qnamAccessor->setCookieJar(pcjCookies);
 
-    // Load the crash reporter page.
-    QWebPage *qwpPage = new QWebPage(this);
-    qwpPage->setNetworkAccessManager(qnamAccessor);
-    qwvWebView->setPage(qwpPage);
-    qwvWebView->load(QUrl(QLatin1String("http://mumble-ios.appspot.com/crashreporter")));
+    // Load home page (crash reporter page)
+    on_qaGoHome_triggered();
 }
 
 CrashReporter::~CrashReporter() {
@@ -69,7 +69,9 @@ CrashReporter::~CrashReporter() {
     pcjCookies->persistCookiesToIODevice(&f);
 
     // Store geometry data
-    qsSettings->setValue(QLatin1String("UserInterface/MainWindowGeometry"), saveGeometry());
+    Settings *s = Settings::get();
+    s->setMainWindowGeometry(saveGeometry());
+    s->sync();
 
     // Work around crash is WebCore::PopupMenu::~PopupMenu()
     qwvWebView->load(QUrl(QLatin1String("about:blank")));
@@ -82,6 +84,22 @@ QString CrashReporter::cookieDataFilePath() {
     d.mkdir(path);
 
     return QDir(path).absoluteFilePath("cookies.qds46");
+}
+
+void CrashReporter::clearCookies() {
+    pcjCookies->clear();
+}
+
+void CrashReporter::loadUrl(const QString &url) {
+    // Load the crash reporter page.
+    QWebPage *qwpPage = new QWebPage(this);
+    qwpPage->setNetworkAccessManager(qnamAccessor);
+    qwvWebView->setPage(qwpPage);
+    qwvWebView->load(QUrl(url));
+}
+
+void CrashReporter::loadHomepage() {
+    loadUrl(QLatin1String("http://mumble-ios.appspot.com/crashreporter"));
 }
 
 void CrashReporter::injectCrashReporterJavaScript() {
@@ -120,4 +138,37 @@ void CrashReporter::on_qwvWebView_titleChanged(const QString &message) {
     } else {
         this->setWindowTitle(QString::fromLatin1("%1 -- %2").arg(windowTitle, message));
     }
+}
+
+void CrashReporter::on_qaGoHome_triggered() {
+    loadHomepage();
+}
+
+void CrashReporter::on_qaConfiguration_triggered() {
+    ConfigDialog *cdDialog = new ConfigDialog(this);
+    if (cdDialog->exec() == QDialog::Accepted) {
+        if (cdDialog->clearCookies())
+            clearCookies();
+        loadHomepage();
+    }
+}
+
+void CrashReporter::on_qaQuit_triggered() {
+    qApp->quit();
+}
+
+void CrashReporter::on_qaAbout_triggered() {
+    QMessageBox *qmb = new QMessageBox(this);
+    qmb->setWindowTitle(QString::fromLatin1("About %1").arg(QLatin1String("Mumble for iOS Beta Crash Reporter")));
+    qmb->setText(QString::fromLatin1("%1 %2").arg(QLatin1String("Mumble for iOS Beta Crash Reporter"), qApp->applicationVersion()));
+    qmb->exec();
+    delete qmb;
+}
+
+void CrashReporter::on_qaAboutQt_triggered() {
+    qApp->aboutQt();
+}
+
+void CrashReporter::on_qaHelp_triggered() {
+    loadUrl(QLatin1String("http://mumble-ios.appspot.com/crashreporter/help"));
 }

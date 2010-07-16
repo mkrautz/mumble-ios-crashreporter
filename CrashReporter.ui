@@ -27,9 +27,80 @@
    </layout>
   </widget>
   <widget class="QStatusBar" name="qsbStatusBar"/>
-  <action name="actionExit">
+  <widget class="QMenuBar" name="qmbMenuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>736</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="qmCrashReporter">
+    <property name="title">
+     <string>&amp;Crash Reporter</string>
+    </property>
+    <addaction name="qaGoHome"/>
+    <addaction name="separator"/>
+    <addaction name="qaConfiguration"/>
+    <addaction name="separator"/>
+    <addaction name="qaQuit"/>
+   </widget>
+   <widget class="QMenu" name="qmHelp">
+    <property name="title">
+     <string>&amp;Help</string>
+    </property>
+    <addaction name="qaAbout"/>
+    <addaction name="qaAboutQt"/>
+    <addaction name="separator"/>
+    <addaction name="qaHelp"/>
+   </widget>
+   <addaction name="qmCrashReporter"/>
+   <addaction name="qmHelp"/>
+  </widget>
+  <action name="qaGoHome">
    <property name="text">
-    <string>Exit</string>
+    <string>Go to &amp;Home Page</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+Home</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="qaConfiguration">
+   <property name="text">
+    <string>&amp;Configuration</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+,</string>
+   </property>
+  </action>
+  <action name="qaQuit">
+   <property name="text">
+    <string>&amp;Quit</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+F4</string>
+   </property>
+  </action>
+  <action name="qaAbout">
+   <property name="text">
+    <string>&amp;About Mumble for iOS Beta Crash Reporter</string>
+   </property>
+  </action>
+  <action name="qaAboutQt">
+   <property name="text">
+    <string>About &amp;Qt</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::AboutQtRole</enum>
+   </property>
+  </action>
+  <action name="qaHelp">
+   <property name="text">
+    <string>&amp;Help</string>
    </property>
   </action>
  </widget>

@@ -231,9 +231,14 @@ QList<QNetworkCookie> PersistentCookieJar::allCookies() const {
 
 // Set all cookies
 void PersistentCookieJar::setAllCookies(const QList<QNetworkCookie> &cookieList) {
-    storage.clear();
+    clear();
     foreach (QNetworkCookie cookie, cookieList) {
         QString domain = cookie.domain();
         storage[domain].append(cookie);
     }
+}
+
+// Clear cookies.
+void PersistentCookieJar::clear() {
+    storage.clear();
 }

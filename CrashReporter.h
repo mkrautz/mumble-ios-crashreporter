@@ -45,6 +45,7 @@ class CrashReporter : public QMainWindow, public Ui::CrashReporter {
 public:
     CrashReporter(QWidget *parent = 0);
     ~CrashReporter();
+    void clearCookies();
     static QString cookieDataFilePath();
 
 protected:
@@ -55,12 +56,20 @@ protected:
     QString windowTitle;
     QProgressBar *qpbProgressBar;
     void injectCrashReporterJavaScript();
+    void loadUrl(const QString &url);
+    void loadHomepage();
 
 public slots:
     void on_qwvWebView_loadFinished(bool ok);
     void on_qwvWebView_loadProgress(int pct);
     void on_qwvWebView_statusBarMessage(const QString &message);
     void on_qwvWebView_titleChanged(const QString &message);
+    void on_qaGoHome_triggered();
+    void on_qaConfiguration_triggered();
+    void on_qaQuit_triggered();
+    void on_qaAbout_triggered();
+    void on_qaAboutQt_triggered();
+    void on_qaHelp_triggered();
 };
 
 #endif

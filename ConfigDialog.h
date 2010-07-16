@@ -27,32 +27,35 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef __PERSISTENTCOOKIEJAR_H__
-#define __PERSISTENTCOOKIEJAR_H__
+#ifndef __CONFIGDIALOG_H__
+#define __CONFIGDIALOG_H__
 
-#include <QtNetwork/QtNetwork>
-#include "DomainNameHelper.h"
+#include <QtGui/QtGui>
+#include "ui_ConfigDialog.h"
 
-class PersistentCookieJar : public QNetworkCookieJar {
-    Q_OBJECT
+namespace Ui {
+    class ConfigDialog;
+}
 
-protected:
-    DomainNameHelper dnh;
-    QMap<QString, QList<QNetworkCookie> > storage;
-    QString safeCookieDomain(QNetworkCookie &cookie, const QUrl &url);
+class ConfigDialog : public QDialog, public Ui::ConfigDialog {
+        Q_OBJECT
 
-public:
-    PersistentCookieJar(QObject *parent = 0);
-    ~PersistentCookieJar();
+    public:
+        ConfigDialog(QWidget *p = NULL);
+        ~ConfigDialog();
+        bool clearCookies();
 
-    void persistCookiesToIODevice(QIODevice *device);
-    void loadPersistentCookiesFromIODevice(QIODevice *device);
+    protected:
+        bool bClearCookies;
+        void apply();
 
-    QList<QNetworkCookie> cookiesForUrl(const QUrl &url) const;
-    bool setCookiesFromUrl(const QList<QNetworkCookie> &cookieList, const QUrl &url);
-    QList<QNetworkCookie> allCookies() const;
-    void setAllCookies(const QList<QNetworkCookie> &cookieList);
-    void clear();
+    public slots:
+        void on_qdbbButtonBox_clicked(QAbstractButton *b);
+        void on_qcbType_currentIndexChanged(int idx);
+        void on_qpbClearCookies_clicked();
+        void on_qpbShowSubmittedLogs_clicked();
+        void on_qpbDeleteSubmittedLogs_clicked();
+        void accept();
 };
 
 #endif

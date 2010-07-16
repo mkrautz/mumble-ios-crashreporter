@@ -7,16 +7,21 @@ SOURCES += \
     CrashReporter.cpp \
     PersistentCookieJar.cpp \
     DomainNameHelper.cpp \
-    LogHandler.cpp
+    LogHandler.cpp \
+    ConfigDialog.cpp \
+    Settings.cpp
 
 HEADERS += \
     CrashReporter.h \
     PersistentCookieJar.h \
     DomainNameHelper.h \
-    LogHandler.h
+    LogHandler.h \
+    ConfigDialog.h \
+    Settings.h
 
 FORMS += \
-    CrashReporter.ui
+    CrashReporter.ui \
+    ConfigDialog.ui
 
 RESOURCES += \
     mumble-ios-crashreporter.qrc

@@ -27,32 +27,38 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef __PERSISTENTCOOKIEJAR_H__
-#define __PERSISTENTCOOKIEJAR_H__
+#ifndef SETTINGS_H
+#define SETTINGS_H
 
+#include <QtCore/QtCore>
 #include <QtNetwork/QtNetwork>
-#include "DomainNameHelper.h"
 
-class PersistentCookieJar : public QNetworkCookieJar {
-    Q_OBJECT
-
+class Settings {
+    static Settings *singleton;
 protected:
-    DomainNameHelper dnh;
-    QMap<QString, QList<QNetworkCookie> > storage;
-    QString safeCookieDomain(QNetworkCookie &cookie, const QUrl &url);
-
+    QSettings *qsSettings;
 public:
-    PersistentCookieJar(QObject *parent = 0);
-    ~PersistentCookieJar();
+    Settings();
+    ~Settings();
+    static Settings *get();
 
-    void persistCookiesToIODevice(QIODevice *device);
-    void loadPersistentCookiesFromIODevice(QIODevice *device);
+    void setMainWindowGeometry(const QByteArray &geom);
+    void setProxyType(const int type);
+    void setProxyHostname(const QString &hostname);
+    void setProxyPort(const unsigned int port);
+    void setProxyUsername(const QString &username);
+    void setProxyPassword(const QString &password);
 
-    QList<QNetworkCookie> cookiesForUrl(const QUrl &url) const;
-    bool setCookiesFromUrl(const QList<QNetworkCookie> &cookieList, const QUrl &url);
-    QList<QNetworkCookie> allCookies() const;
-    void setAllCookies(const QList<QNetworkCookie> &cookieList);
-    void clear();
+    QByteArray mainWindowGeometry(const QByteArray &defaultVal = QByteArray());
+    int proxyType();
+    QString proxyHostname();
+    unsigned int proxyPort();
+    QString proxyUsername();
+    QString proxyPassword();
+
+    void setupApplicationProxy();
+    void apply();
+    void sync();
 };
 
 #endif

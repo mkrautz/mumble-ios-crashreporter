@@ -47,6 +47,10 @@ class LogHandler : public QObject {
         ~LogHandler();
         void setNetworkAccessManager(QNetworkAccessManager *qnam);
         QNetworkAccessManager *networkAccessManager() const;
+        static void showSubmittedCrashLogs();
+        static void deleteSubmittedCrashLogs();
+        static QString crashLogDirectory();
+        static QString submittedCrashLogDirectory();
 
     protected:
         State sState;
@@ -68,8 +72,6 @@ class LogHandler : public QObject {
         QMap<QString, QStringList> qmSafeDeviceFiles;
         QStringList qslSafeDeviceNames;
 
-        QString crashLogDirectory() const;
-        QString submittedCrashLogDirectory() const;
         QFileInfoList crashLogPathsForApplication(const QString &deviceName, const QString &appName) const;
         QList<DeviceLog> allCrashLogs();
         void submitNextLog();
