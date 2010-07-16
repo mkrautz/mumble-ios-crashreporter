@@ -1,12 +1,18 @@
 QT += core gui network webkit
+
 TARGET = MumbleiOSBetaCrashReporter
+TEMPLATE = app
+
+win32 {
+	RC_FILE = mumble-ios-crashreporter.rc
+}
+
 macx {
 	TARGET = "Mumble for iOS Beta Crash Reporter"
 	ICON = mumble.icns
     QMAKE_INFO_PLIST = mumble-ios-crashreporter.plist
     QMAKE_PKGINFO_TYPEINFO = MICR
 }
-TEMPLATE = app
 
 SOURCES += \
     main.cpp \
