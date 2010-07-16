@@ -1,0 +1,6 @@
+Makefile
+Makefile.Debug
+Makefile.Release
+debug/
+release/
+*~
