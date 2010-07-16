@@ -4,3 +4,4 @@ Makefile.Release
 debug/
 release/
 *~
+.DS_Store
