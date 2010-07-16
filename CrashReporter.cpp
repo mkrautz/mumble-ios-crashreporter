@@ -37,7 +37,7 @@ CrashReporter::CrashReporter(QWidget *parent) : QMainWindow(parent) {
 
     // Restore stored geometry
     Settings *s = Settings::get();
-    restoreGeometry(s->mainWindowGeometry(saveGeometry()));
+    restoreGeometry(s->mainWindowGeometry());
     // Apply any global settings (if needed)
     s->apply();
 
