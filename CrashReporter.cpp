@@ -34,6 +34,9 @@
 CrashReporter::CrashReporter(QWidget *parent) : QMainWindow(parent) {
     setupUi(this);
     windowTitle = QString::fromLatin1("Mumble for iOS Beta Crash Reporter %1").arg(qApp->applicationVersion());
+#ifdef Q_OS_MAC
+	qmCrashReporter->menuAction()->setVisible(false);
+#endif
 
     // Restore stored geometry
     Settings *s = Settings::get();

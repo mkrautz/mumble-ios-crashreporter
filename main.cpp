@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
 
     QApplication a(argc, argv);
     a.setApplicationName(QLatin1String("MumbleiOSBetaCrashReporter"));
-    a.setApplicationVersion(QLatin1String("1.0"));
+    a.setApplicationVersion(QLatin1String("1.1"));
     a.setOrganizationName(QLatin1String("Mumble"));
     a.setOrganizationDomain(QLatin1String("mumble.info"));
 
