@@ -194,7 +194,7 @@ QByteArray LogHandler::contentsOfCrashFile(const QString &deviceName, const QStr
     if (qsCrashLogDir.isEmpty())
 		return QByteArray();
 
-	// Are we accessing a safe file?
+    // Are we accessing a safe file?
     if (! qslSafeDeviceNames.contains(deviceName) || ! qmSafeDeviceFiles[deviceName].contains(fileName))
         return QByteArray();
 
@@ -303,8 +303,10 @@ void LogHandler::submitNextLog() {
     DeviceLog log = qlSubmitList.at(iCurrentLog);
     qpdProgress->setLabelText(QString::fromLatin1("Submitting '%1 from device '%2'").arg(log.second, log.first));
     qpdProgress->setValue(iCurrentLog);
-    QNetworkReply *reply = qnamAccessManager->post(QNetworkRequest(QUrl(QLatin1String("https://mumble-ios.appspot.com/crashreporter/send"))),
-                                                        contentsOfCrashFile(log.first, log.second));
+    QByteArray contents = contentsOfCrashFile(log.first, log.second);
+    QNetworkRequest req(QUrl(QLatin1String("https://mumble-ios.appspot.com/crashreporter/send")));
+    req.setHeader(QNetworkRequest::ContentTypeHeader, QVariant(QLatin1String("application/octet-stream")));
+    QNetworkReply *reply = qnamAccessManager->post(req, contents);
     QObject::connect(reply, SIGNAL(finished()), this, SLOT(uploadFinished()));
 }
 
