@@ -109,6 +109,11 @@ void Settings::setProxyPort(const unsigned int port) {
     qsSettings->setValue(QLatin1String("Network/Proxy/Port"), port);
 }
 
+// Set verbose javascript errors
+void Settings::setVerboseJavaScriptErrors(bool b) {
+    qsSettings->setValue(QLatin1String("Browser/VerboseJSErrors"), b);
+}
+
 // Get proxy port
 unsigned int Settings::proxyPort() {
     return qsSettings->value(QLatin1String("Network/Proxy/Port")).toUInt();
@@ -132,4 +137,9 @@ void Settings::setProxyPassword(const QString &password) {
 // Get proxy password
 QString Settings::proxyPassword() {
     return qsSettings->value(QLatin1String("Network/Proxy/Password")).toString();
+}
+
+// Get verbose JavaScript errors
+bool Settings::verboseJavaScriptErrors() {
+    return qsSettings->value(QLatin1String("Browser/VerboseJSErrors")).toBool();
 }

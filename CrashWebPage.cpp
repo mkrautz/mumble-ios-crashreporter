@@ -27,40 +27,17 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SETTINGS_H
-#define SETTINGS_H
+#include "CrashWebPage.h"
+#include "Settings.h"
 
-#include <QtCore/QtCore>
-#include <QtNetwork/QtNetwork>
+#include <QtGui/QtGui>
 
-class Settings {
-    static Settings *singleton;
-protected:
-    QSettings *qsSettings;
-public:
-    Settings();
-    ~Settings();
-    static Settings *get();
-
-    void setMainWindowGeometry(const QByteArray &geom);
-    void setProxyType(const int type);
-    void setProxyHostname(const QString &hostname);
-    void setProxyPort(const unsigned int port);
-    void setProxyUsername(const QString &username);
-    void setProxyPassword(const QString &password);
-    void setVerboseJavaScriptErrors(bool b);
-
-    QByteArray mainWindowGeometry(const QByteArray &defaultVal = QByteArray());
-    int proxyType();
-    QString proxyHostname();
-    unsigned int proxyPort();
-    QString proxyUsername();
-    QString proxyPassword();
-    bool verboseJavaScriptErrors();
-
-    void setupApplicationProxy();
-    void apply();
-    void sync();
-};
-
-#endif
+void CrashWebPage::javaScriptConsoleMessage(const QString &message, int lineNumber, const QString &sourceID) {
+	Settings *s = Settings::get();
+	if (s->verboseJavaScriptErrors()) {
+		qWarning("JS Output [%s,%i] %s", qPrintable(sourceID), lineNumber, qPrintable(message));	
+		QMessageBox::warning(NULL, QString::fromLatin1("JavaScript"),
+								   QString::fromLatin1("%1:%2\n%3").arg(sourceID, QString::number(lineNumber), message),
+								   QMessageBox::Ok, QMessageBox::Ok);
+	}
+}

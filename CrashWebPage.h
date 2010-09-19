@@ -27,40 +27,11 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SETTINGS_H
-#define SETTINGS_H
+#include <QtWebKit/QtWebKit>
 
-#include <QtCore/QtCore>
-#include <QtNetwork/QtNetwork>
-
-class Settings {
-    static Settings *singleton;
-protected:
-    QSettings *qsSettings;
-public:
-    Settings();
-    ~Settings();
-    static Settings *get();
-
-    void setMainWindowGeometry(const QByteArray &geom);
-    void setProxyType(const int type);
-    void setProxyHostname(const QString &hostname);
-    void setProxyPort(const unsigned int port);
-    void setProxyUsername(const QString &username);
-    void setProxyPassword(const QString &password);
-    void setVerboseJavaScriptErrors(bool b);
-
-    QByteArray mainWindowGeometry(const QByteArray &defaultVal = QByteArray());
-    int proxyType();
-    QString proxyHostname();
-    unsigned int proxyPort();
-    QString proxyUsername();
-    QString proxyPassword();
-    bool verboseJavaScriptErrors();
-
-    void setupApplicationProxy();
-    void apply();
-    void sync();
+class CrashWebPage : public QWebPage {
+	public:
+		CrashWebPage(QObject *p = 0) : QWebPage(p) {};
+	protected:
+		virtual void javaScriptConsoleMessage(const QString &message, int lineNumber, const QString &sourceID);
 };
-
-#endif

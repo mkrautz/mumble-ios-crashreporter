@@ -51,6 +51,7 @@ ConfigDialog::ConfigDialog(QWidget *p) : QDialog(p) {
         qlePort->setText(QString::number(port));
     qleUsername->setText(s->proxyUsername());
     qlePassword->setText(s->proxyPassword());
+    qcbJSErrors->setCheckState(s->verboseJavaScriptErrors() ? Qt::Checked : Qt::Unchecked);
 }
 
 ConfigDialog::~ConfigDialog() {
@@ -74,6 +75,7 @@ void ConfigDialog::apply() {
     s->setProxyPort(qlePort->text().toUInt());
     s->setProxyUsername(qleUsername->text());
     s->setProxyPassword(qlePassword->text());
+    s->setVerboseJavaScriptErrors(qcbJSErrors->checkState() == Qt::Checked);
     s->apply();
 }
 

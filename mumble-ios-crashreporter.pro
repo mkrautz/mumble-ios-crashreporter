@@ -21,7 +21,8 @@ SOURCES += \
     DomainNameHelper.cpp \
     LogHandler.cpp \
     ConfigDialog.cpp \
-    Settings.cpp
+    Settings.cpp \
+    CrashWebPage.cpp
 
 HEADERS += \
     CrashReporter.h \
@@ -29,7 +30,8 @@ HEADERS += \
     DomainNameHelper.h \
     LogHandler.h \
     ConfigDialog.h \
-    Settings.h
+    Settings.h \
+    CrashWebPage.h
 
 FORMS += \
     CrashReporter.ui \

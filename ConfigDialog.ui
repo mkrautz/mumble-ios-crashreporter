@@ -198,9 +198,16 @@
    <item>
     <widget class="QGroupBox" name="qgbStorage">
      <property name="title">
-      <string>Storage</string>
+      <string>Other</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_3">
+      <item>
+       <widget class="QCheckBox" name="qcbJSErrors">
+        <property name="text">
+         <string>Verbose JavaScript errors</string>
+        </property>
+       </widget>
+      </item>
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>

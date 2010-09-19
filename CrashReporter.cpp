@@ -30,6 +30,7 @@
 #include "CrashReporter.h"
 #include "ConfigDialog.h"
 #include "Settings.h"
+#include "CrashWebPage.h"
 
 CrashReporter::CrashReporter(QWidget *parent) : QMainWindow(parent) {
     setupUi(this);
@@ -95,9 +96,9 @@ void CrashReporter::clearCookies() {
 
 void CrashReporter::loadUrl(const QString &url) {
     // Load the crash reporter page.
-    QWebPage *qwpPage = new QWebPage(this);
-    qwpPage->setNetworkAccessManager(qnamAccessor);
-    qwvWebView->setPage(qwpPage);
+    CrashWebPage *cwpPage = new CrashWebPage(this);
+    cwpPage->setNetworkAccessManager(qnamAccessor);
+    qwvWebView->setPage(cwpPage);
     qwvWebView->load(QUrl(url));
 }
 
