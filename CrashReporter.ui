@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>736</width>
-    <height>589</height>
+    <width>721</width>
+    <height>442</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -24,6 +24,9 @@
     <item>
      <widget class="QWebView" name="qwvWebView"/>
     </item>
+    <item>
+     <widget class="QListWidget" name="qlwDebug"/>
+    </item>
    </layout>
   </widget>
   <widget class="QStatusBar" name="qsbStatusBar"/>
@@ -32,7 +35,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>736</width>
+     <width>721</width>
      <height>22</height>
     </rect>
    </property>

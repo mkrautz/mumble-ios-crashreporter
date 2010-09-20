@@ -70,6 +70,7 @@ public slots:
     void on_qaAbout_triggered();
     void on_qaAboutQt_triggered();
     void on_qaHelp_triggered();
+    void fetchFinished(QNetworkReply *);
 };
 
 #endif

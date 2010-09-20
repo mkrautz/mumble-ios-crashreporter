@@ -36,7 +36,7 @@ CrashReporter::CrashReporter(QWidget *parent) : QMainWindow(parent) {
     setupUi(this);
     windowTitle = QString::fromLatin1("Mumble for iOS Beta Crash Reporter %1").arg(qApp->applicationVersion());
 #ifdef Q_OS_MAC
-	qmCrashReporter->menuAction()->setVisible(false);
+    qmCrashReporter->menuAction()->setVisible(false);
 #endif
 
     // Restore stored geometry
@@ -44,6 +44,12 @@ CrashReporter::CrashReporter(QWidget *parent) : QMainWindow(parent) {
     restoreGeometry(s->mainWindowGeometry());
     // Apply any global settings (if needed)
     s->apply();
+
+    if (s->verboseJavaScriptErrors()) {
+        qlwDebug->show();
+    } else {
+        qlwDebug->hide();
+    }
 
     // New log finder
     lhLogHandler = new LogHandler(this);
@@ -56,6 +62,7 @@ CrashReporter::CrashReporter(QWidget *parent) : QMainWindow(parent) {
 
     // Create Network Access Manager for the crash reporter
     qnamAccessor = new QNetworkAccessManager(this);
+    QObject::connect(qnamAccessor, SIGNAL(finished(QNetworkReply *)), this, SLOT(fetchFinished(QNetworkReply *)));
 
     // Load cookies.
     pcjCookies = new PersistentCookieJar();
@@ -155,6 +162,12 @@ void CrashReporter::on_qaConfiguration_triggered() {
             clearCookies();
         loadHomepage();
     }
+    Settings *s = Settings::get();
+    if (s->verboseJavaScriptErrors()) {
+        qlwDebug->show();
+    } else {
+        qlwDebug->hide();
+    }
 }
 
 void CrashReporter::on_qaQuit_triggered() {
@@ -175,4 +188,15 @@ void CrashReporter::on_qaAboutQt_triggered() {
 
 void CrashReporter::on_qaHelp_triggered() {
     loadUrl(QLatin1String("http://mumble-ios.appspot.com/crashreporter/help"));
+}
+
+void CrashReporter::fetchFinished(QNetworkReply *reply) {
+    if (!qlwDebug->isVisible())
+        return;
+    QString url = reply->url().toString();
+    if (url.startsWith("data:")) {
+        QListWidgetItem *qlwiApplication = new QListWidgetItem(QString::fromLatin1("[FETCH] data: url (omitted)"), qlwDebug);
+    } else {
+        QListWidgetItem *qlwiApplication = new QListWidgetItem(QString::fromLatin1("[FETCH] %1").arg(url), qlwDebug);
+    }
 }

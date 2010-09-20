@@ -204,7 +204,7 @@
       <item>
        <widget class="QCheckBox" name="qcbJSErrors">
         <property name="text">
-         <string>Verbose JavaScript errors</string>
+         <string>JavaScript / HTTP debugging</string>
         </property>
        </widget>
       </item>
