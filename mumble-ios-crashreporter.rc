@@ -29,8 +29,8 @@ VS_VERSION_INFO VERSIONINFO
 			BEGIN
 				VALUE "CompanyName", "Mikkel Krautz"
 				VALUE "FileDescription", "Mumble for iOS Beta Crash Reporter"
-				VALUE "FileVersion", "1.2.1-pre1"
-				VALUE "ProductVersion", "1.2.1-pre1"
+				VALUE "FileVersion", "1.2.1-pre2"
+				VALUE "ProductVersion", "1.2.1-pre2"
 				VALUE "LegalCopyright", "Copyright (C) 2010 Mikkel Krautz <mikkel@krautz.dk>"
 				VALUE "OriginalFilename", "MumbleiOSBetaCrashReporter.exe"
 				VALUE "ProductName", "Mumble for iOS Beta Crash Reporter"
