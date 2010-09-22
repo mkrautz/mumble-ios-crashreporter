@@ -30,6 +30,9 @@
 
 #include <QtGui/QApplication>
 #include "CrashReporter.h"
+#ifdef Q_OS_WIN
+# include <windows.h>
+#endif
 
 static FILE *fConsole = NULL;
 
@@ -67,16 +70,13 @@ static void mumbleMessageOutput(QtMsgType type, const char *msg) {
 }
 
 static void setupLogging() {
+#ifdef Q_OS_WIN
+    _wfopen_s(&fConsole, L"log.txt", L"a+");
+#else
     QString path = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
     QDir d;
     d.mkpath(path);
     QString logfile = QDir(path).absoluteFilePath("log.txt");
-#ifdef Q_OS_WIN
-    wchar_t *logfn = (wchar_t *)calloc(logfile.length()+1, 1);
-    logfile.toWCharArray(&logfn);
-    errno_t err = _wfopen_s(&fConsole, logfn, L"a+");
-    free(logfn);
-#else
     fConsole = fopen(qPrintable(logfile), "a+");
 #endif
     if (fConsole)

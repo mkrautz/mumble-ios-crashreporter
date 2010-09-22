@@ -5,6 +5,7 @@ TEMPLATE = app
 
 win32 {
 	RC_FILE = mumble-ios-crashreporter.rc
+	QMAKE_LIBS += user32.lib
 }
 
 macx {
