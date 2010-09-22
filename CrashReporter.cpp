@@ -125,11 +125,14 @@ void CrashReporter::injectCrashReporterJavaScript() {
 void CrashReporter::on_qwvWebView_loadFinished(bool ok) {
     if (ok) {
         qsbStatusBar->hide();
-
         // Check if we've loaded our crash reporter page...
         QString url = qwvWebView->url().toString();
         if (url == QLatin1String("https://mumble-ios.appspot.com/crashreporter") || url == QLatin1String("http://mumble-ios.appspot.com/crashreporter")) {
             injectCrashReporterJavaScript();
+        }
+    } else {
+        if (qlwDebug->isVisible()) {
+            QListWidgetItem *qlwiLoadFailed = new QListWidgetItem(QString::fromLatin1("[FAIL] Failed to load URL %1").arg(qwvWebView->url().toString()), qlwDebug);
         }
     }
 }
@@ -140,6 +143,9 @@ void CrashReporter::on_qwvWebView_loadProgress(int pct) {
 }
 
 void CrashReporter::on_qwvWebView_statusBarMessage(const QString &message) {
+    if (qlwDebug->isVisible()) {
+        QListWidgetItem *qlwiStatusBar = new QListWidgetItem(QString::fromLatin1("[STATUSBAR] %1").arg(message), qlwDebug);
+    }
     qsbStatusBar->showMessage(message);
 }
 
