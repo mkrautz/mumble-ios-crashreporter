@@ -1,4 +1,5 @@
 /* Copyright (C) 2010 Mikkel Krautz <mikkel@krautz.dk>
+   Copyright (C) 2005-2010, Thorvald Natvig <thorvald@natvig.com>
 
    All rights reserved.
    Redistribution and use in source and binary forms, with or without
@@ -30,6 +31,58 @@
 #include <QtGui/QApplication>
 #include "CrashReporter.h"
 
+static FILE *fConsole = NULL;
+
+static void mumbleMessageOutput(QtMsgType type, const char *msg) {
+    char c;
+    switch (type) {
+        case QtDebugMsg:
+            c='D';
+            break;
+        case QtWarningMsg:
+            c='W';
+            break;
+        case QtFatalMsg:
+            c='F';
+            break;
+        default:
+            c='X';
+    }
+
+#define LOG(f, msg) fprintf(f, "<%c>%s %s\n", c, \
+                qPrintable(QDateTime::currentDateTime().toString(QLatin1String("yyyy-MM-dd hh:mm:ss.zzz"))), msg); \
+        fflush(f)
+
+    LOG(fConsole, msg);
+#ifdef Q_OS_MAC
+    LOG(stderr, msg);
+#endif
+
+    if (type == QtFatalMsg) {
+#ifdef Q_OS_WIN
+        ::MessageBoxA(NULL, msg, "Mumble", MB_OK | MB_ICONERROR);
+#endif
+        exit(0);
+    }
+}
+
+static void setupLogging() {
+    QString path = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
+    QDir d;
+    d.mkpath(path);
+    QString logfile = QDir(path).absoluteFilePath("log.txt");
+#ifdef Q_OS_WIN
+    wchar_t *logfn = (wchar_t *)calloc(logfile.length()+1, 1);
+    logfile.toWCharArray(&logfn);
+    errno_t err = _wfopen_s(&fConsole, logfn, L"a+");
+    free(logfn);
+#else
+    fConsole = fopen(qPrintable(logfile), "a+");
+#endif
+    if (fConsole)
+        qInstallMsgHandler(mumbleMessageOutput);
+}
+
 int main(int argc, char *argv[]) {
     QT_REQUIRE_VERSION(argc, argv, "4.6.0");
 
@@ -38,6 +91,8 @@ int main(int argc, char *argv[]) {
     a.setApplicationVersion(QLatin1String("1.2.1-pre3"));
     a.setOrganizationName(QLatin1String("Mumble"));
     a.setOrganizationDomain(QLatin1String("mumble.info"));
+
+    setupLogging();
 
     CrashReporter cr;
     cr.show();
